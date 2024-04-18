@@ -29,7 +29,7 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
-        .form-group input[type="file"] {
+        .form-group input[type="file"], .form-group textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -37,15 +37,10 @@
             box-sizing: border-box;
         }
         .form-group textarea {
-            width: 100%;
             height: 100px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
             resize: vertical; /* Allow vertical resizing */
         }
-        .form-group input[type="submit"] {
+        .form-group button {
             width: 100%;
             padding: 10px;
             border: none;
@@ -55,7 +50,7 @@
             font-size: 16px;
             cursor: pointer;
         }
-        .form-group input[type="submit"]:hover {
+        .form-group button:hover {
             background-color: #4cae4c;
         }
         .file-name {
@@ -63,25 +58,43 @@
             font-style: italic;
             color: #555;
         }
+        .loader {
+            display: none; /* Hidden by default */
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            animation: spin 2s linear infinite;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>PDF Analysis Tool</h1>
-        <form method="post" enctype="multipart/form-data">
+        <form id="uploadForm" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="file">Choose PDF file</label>
-                <input type="file" name="file" id="file" onchange="updateFileName()">
+                <input type="file" name="file" id="file" required onchange="updateFileName()">
                 <div class="file-name" id="file-name"></div>
             </div>
             <div class="form-group">
                 <label for="phrases">Phrases to analyze (separated by semicolon ';')</label>
-                <textarea id="phrases" name="phrases" placeholder="Enter phrases separated by semicolon ';'"></textarea>
+                <textarea id="phrases" name="phrases" required placeholder="Enter phrases separated by semicolon ';'"></textarea>
             </div>
             <div class="form-group">
-                <input type="submit" value="Upload and Analyze">
+                <button type="button" onclick="submitForm()">Upload and Analyze</button>
             </div>
         </form>
+        <div class="loader" id="loader"></div>
     </div>
     <script>
         function updateFileName() {
@@ -89,6 +102,37 @@
             var output = document.getElementById('file-name');
             var fileName = input.value.split('\\').pop(); // Extracts file name from path
             output.textContent = 'Selected file: ' + fileName;
+        }
+
+        function submitForm() {
+            var form = document.getElementById('uploadForm');
+            var formData = new FormData(form);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/', true);
+
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 400) {
+                    // Success!
+                    document.getElementById('loader').style.display = 'none';
+                    document.body.innerHTML = xhr.responseText; // Display results page or update the DOM accordingly
+                } else {
+                    // We reached our target server, but it returned an error
+                    alert('Error: ' + xhr.responseText);
+                    document.getElementById('loader').style.display = 'none';
+                }
+            };
+
+            xhr.onerror = function () {
+                // There was a connection error of some sort
+                alert('Error: Could not connect to server.');
+                document.getElementById('loader').style.display = 'none';
+            };
+
+            xhr.onstart = function () {
+                document.getElementById('loader').style.display = 'block';
+            };
+
+            xhr.send(formData);
         }
     </script>
 </body>
