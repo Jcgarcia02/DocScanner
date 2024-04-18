@@ -4,18 +4,90 @@
     <meta charset="UTF-8">
     <title>Upload your PDF</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; }
-        .container { max-width: 800px; margin: 50px auto; padding: 20px; background-color: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        h1 { color: #333; text-align: center; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input[type="file"], .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .form-group textarea { height: 100px; resize: vertical; }
-        .form-group button { width: 100%; padding: 10px; background-color: #5cb85c; color: white; border-radius: 5px; font-size: 16px; cursor: pointer; border: none; }
-        .form-group button:hover { background-color: #4cae4c; }
-        .file-name { margin-top: 10px; font-style: italic; color: #555; }
-        .loader { display: none; border: 16px solid #f3f3f3; border-top: 16px solid #3498db; border-radius: 50%; width: 100px; height: 100px; animation: spin 2s linear infinite; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-        @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input[type="file"], .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical; /* Allow vertical resizing */
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #5cb85c;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #4cae4c;
+        }
+        .file-name {
+            margin-top: 10px;
+            font-style: italic;
+            color: #555;
+        }
+        .overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+            z-index: 2; /* Makes sure it sits on top of other content */
+        }
+        .loader {
+            display: none; /* Hidden by default */
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            animation: spin 2s linear infinite;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -34,14 +106,16 @@
             <div class="form-group">
                 <button type="button" onclick="submitForm()">Upload and Analyze</button>
             </div>
-            <div class="loader" id="loader"></div>
         </form>
+        <div class="overlay" id="overlay">
+            <div class="loader" id="loader"></div>
+        </div>
     </div>
     <script>
         function updateFileName() {
             var input = document.getElementById('file');
             var output = document.getElementById('file-name');
-            var fileName = input.value.split('\\').pop();
+            var fileName = input.value.split('\\').pop(); // Extracts file name from path
             output.textContent = 'Selected file: ' + fileName;
         }
 
@@ -52,22 +126,24 @@
             xhr.open('POST', '/', true);
 
             xhr.onloadstart = function () {
-                document.getElementById('loader').style.display = 'block';
+                document.getElementById('overlay').style.display = 'block'; // Show the overlay
+                document.getElementById('loader').style.display = 'block'; // Show the loader
             };
 
             xhr.onload = function () {
+                document.getElementById('overlay').style.display = 'none'; // Hide the overlay
+                document.getElementById('loader').style.display = 'none'; // Hide the loader
                 if (xhr.status >= 200 && xhr.status < 400) {
-                    document.getElementById('loader').style.display = 'none';
                     document.body.innerHTML = xhr.responseText; // Display results page or update the DOM accordingly
                 } else {
                     alert('Error: ' + xhr.responseText);
-                    document.getElementById('loader').style.display = 'none';
                 }
             };
 
             xhr.onerror = function () {
                 alert('Error: Could not connect to server.');
-                document.getElementById('loader').style.display = 'none';
+                document.getElementById('overlay').style.display = 'none'; // Hide the overlay
+                document.getElementById('loader').style.display = 'none'; // Hide the loader
             };
 
             xhr.send(formData);
