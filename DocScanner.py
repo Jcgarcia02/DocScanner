@@ -46,6 +46,7 @@ def upload_file():
         if file and all(phrase.strip() for phrase in phrases):
             filename = secure_filename(file.filename)
             file_path = os.path.join('uploads', filename)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
             file.save(file_path)
             pdf_text = extract_text_from_pdf(file_path)
             if pdf_text is None:
