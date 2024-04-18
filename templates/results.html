@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analysis Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .phrase {
+            background-color: #e7f4e7;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 5px solid #5cb85c;
+        }
+        .sentence {
+            margin-bottom: 5px;
+            padding: 5px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border-left: 3px solid #dcdcdc;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #5cb85c;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analysis Results for {{ filename }}</h1>
+        <div class="results">
+            {% for phrase, sentences in results.items() %}
+                <div class="phrase">
+                    <h2>Phrase: "{{ phrase }}"</h2>
+                    {% for sentence in sentences %}
+                        <div class="sentence">{{ sentence }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+        <a href="{{ url_for('upload_file') }}">Analyze another document</a>
+    </div>
+</body>
+</html>

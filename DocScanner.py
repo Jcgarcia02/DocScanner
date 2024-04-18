@@ -32,12 +32,12 @@ def search_phrases(doc, phrases):
     target_docs = {phrase: nlp(phrase) for phrase in phrases}  # Preprocess target phrases once
     for sentence in doc.sents:
         for phrase, target_doc in target_docs.items():
-            if target_doc.similarity(sentence) > 0.95:  # Adjust similarity threshold as needed
-                if phrase not in matches:
-                    matches[phrase] = []
-                matches[phrase].append(sentence.text)
+            # Compare each sentence to the target phrase
+            if sentence.similarity(target_doc) > 0.95:  # Adjust similarity threshold as needed
+                # If the sentence is similar to the phrase, add it to the matches
+                matches.setdefault(phrase, []).append(sentence.text)
     return matches
-#TEST
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -52,14 +52,7 @@ def upload_file():
                 return "Failed to extract text from PDF."
             document = nlp(pdf_text)
             results = search_phrases(document, phrases)
-            output_path = os.path.join('results', f"{filename}_results.txt")
-            with open(output_path, "w", encoding='utf-8') as f:
-                for phrase, sentences in results.items():
-                    f.write(f"Phrase: '{phrase}'\nOccurrences:\n")
-                    for sentence in sentences:
-                        f.write(f"{sentence}\n")
-                    f.write("\n")
-            return send_from_directory('results', f"{filename}_results.txt", as_attachment=True)
+            return render_template('results.html', results=results, filename=filename)
     return render_template('upload.html')
 
 if __name__ == "__main__":
